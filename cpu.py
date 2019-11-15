@@ -11,6 +11,7 @@ push = 0b01000101
 pop = 0b01000110
 call = 0b01010000
 ret = 0b00010001
+cmp_ = 0b10100111
 
 class CPU:
     """Main CPU class."""
@@ -20,17 +21,19 @@ class CPU:
         self.ram = [0] * 256
         self.pc = 0
         self.registers = [0] * 8
+        self.fl = 0
 
         self.branchtable = {
-           hlt : self.handle_hlt,
-           ldi : self.handle_ldi,
-           prn : self.handle_prn,
-           add : self.handle_add,
-           mul : self.handle_mul,
-           push : self.handle_push,
-           pop : self.handle_pop,
-           call : self.handle_call,
-           ret : self.handle_ret
+           hlt: self.handle_hlt,
+           ldi: self.handle_ldi,
+           prn: self.handle_prn,
+           add: self.handle_add,
+           mul: self.handle_mul,
+           push: self.handle_push,
+           pop: self.handle_pop,
+           call: self.handle_call,
+           ret: self.handle_ret,
+           cmp_: self.handle_cmp
         }
 
     def ram_read(self, address):
@@ -138,6 +141,25 @@ class CPU:
         self.pc = self.ram[self.registers[7]] 
         # move stack pointer
         self.registers[7] += 1
+
+    def handle_cmp(self, operand_a, operand_b):
+        val1 = self.registers[operand_a]
+        val2 = self.registers[operand_b]
+
+        if val1 == val2:
+            self.fl |= 0b001
+        else:
+            self.fl &= 0b110
+
+        if val1 < val2:
+            self.fl |= 0b100
+        else:
+            self.fl &= 0b011
+
+        if val1 > val2:
+            self.fl |= 0b010
+        else:
+            self.fl &= 0b101
 
     def run(self):
         """Run the CPU."""
