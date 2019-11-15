@@ -173,10 +173,14 @@ class CPU:
     def handle_jeq(self, operand_a, operand_b):
         if self.fl & 0b001 == 1:
             self.pc = self.registers[operand_a]
+        else:
+            self.pc += 2
 
     def handle_jne(self, operand_a, operand_b):
         if self.fl & 0b001 == 0:
             self.pc = self.registers[operand_a]
+        else:
+            self.pc += 2
 
     def run(self):
         """Run the CPU."""
