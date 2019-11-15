@@ -12,6 +12,9 @@ pop = 0b01000110
 call = 0b01010000
 ret = 0b00010001
 cmp_ = 0b10100111
+jmp = 0b01010100 
+jeq = 0b01010101 
+jne = 0b01010110 
 
 class CPU:
     """Main CPU class."""
@@ -33,7 +36,10 @@ class CPU:
            pop: self.handle_pop,
            call: self.handle_call,
            ret: self.handle_ret,
-           cmp_: self.handle_cmp
+           cmp_: self.handle_cmp,
+           jmp: self.handle_jmp,
+           jeq: self.handle_jeq,
+           jne: self.handle_jne
         }
 
     def ram_read(self, address):
@@ -161,6 +167,17 @@ class CPU:
         else:
             self.fl &= 0b101
 
+    def handle_jmp(self, operand_a, operand_b):
+        self.pc = self.registers[operand_a]
+
+    def handle_jeq(self, operand_a, operand_b):
+        if self.fl & 0b001 == 1:
+            self.pc = self.registers[operand_a]
+
+    def handle_jne(self, operand_a, operand_b):
+        if self.fl & 0b001 == 0:
+            self.pc = self.registers[operand_a]
+
     def run(self):
         """Run the CPU."""
 
@@ -172,7 +189,7 @@ class CPU:
             operand_b = self.ram[self.pc + 2]
 
             ops_to_skip = 0
-            if ir != call and ir != ret:
+            if ir != call and ir != ret and ir != jmp and ir != jeq and ir != jne:
                 ops_to_skip = (ir >> 6) + 1
 
             self.branchtable[ir](operand_a, operand_b)
